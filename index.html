@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Important clocks</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .clock-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      max-width: 1200px;
+      justify-content: center;
+    }
+    .clock {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 250px;
+      cursor: move;
+      user-select: none;
+      position: relative;
+    }
+    .city {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .time {
+      font-size: 1.5em;
+      margin: 10px 0;
+    }
+    .date {
+      font-size: 1em;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .gap {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>World Clock (Compared to Cambodia)</h1>
+  <div class="clock-container" id="clocks"></div>
+
+  <script>
+    const cities = [
+      { name: "Cambodia", timeZone: "Asia/Phnom_Penh" },
+      { name: "India", timeZone: "Asia/Kolkata" },
+      { name: "Bangladesh", timeZone: "Asia/Dhaka" },
+      { name: "Saudi Arabia", timeZone: "Asia/Riyadh" },
+      { name: "Dubai", timeZone: "Asia/Dubai" },
+      { name: "America (New York)", timeZone: "America/New_York" },
+      { name: "Malaysia", timeZone: "Asia/Kuala_Lumpur" }
+    ];
+
+    const clocksContainer = document.getElementById('clocks');
+
+    function updateClocks() {
+      clocksContainer.innerHTML = '';
+
+      const cambodiaTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Phnom_Penh" });
+      const cambodiaDate = new Date(cambodiaTime);
+
+      cities.forEach(city => {
+        const cityTimeStr = new Date().toLocaleString("en-US", { timeZone: city.timeZone });
+        const cityDate = new Date(cityTimeStr);
+
+        const diffMs = cityDate.getTime() - cambodiaDate.getTime();
+        const diffMins = Math.round(diffMs / (1000 * 60));
+        const sign = diffMins > 0 ? '+' : (diffMins < 0 ? '−' : '');
+        const hours = Math.floor(Math.abs(diffMins) / 60);
+        const mins = Math.abs(diffMins) % 60;
+        const formattedGap = `${sign}${hours} hr${hours !== 1 ? 's' : ''}${mins ? ` ${mins} min${mins !== 1 ? 's' : ''}` : ''}`;
+
+        const clockEl = document.createElement('div');
+        clockEl.className = 'clock';
+        clockEl.draggable = true;
+        clockEl.innerHTML = `
+          <div class="city">${city.name}</div>
+          <div class="time">${cityDate.toLocaleTimeString()}</div>
+          <div class="date">${cityDate.toDateString()}</div>
+          <div class="gap">Gap with Cambodia: ${formattedGap}</div>
+        `;
+
+        // Drag logic
+        clockEl.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', city.name);
+        });
+
+        clocksContainer.appendChild(clockEl);
+      });
+    }
+
+    // Drag and drop logic
+    let dragSrcEl = null;
+
+    clocksContainer.addEventListener('dragstart', function (e) {
+      dragSrcEl = e.target;
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    clocksContainer.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+
+    clocksContainer.addEventListener('drop', function (e) {
+      e.preventDefault();
+      const target = e.target.closest('.clock');
+      if (dragSrcEl && target && dragSrcEl !== target) {
+        const allClocks = Array.from(clocksContainer.children);
+        const dragIndex = allClocks.indexOf(dragSrcEl);
+        const dropIndex = allClocks.indexOf(target);
+        if (dragIndex < dropIndex) {
+          clocksContainer.insertBefore(dragSrcEl, target.nextSibling);
+        } else {
+          clocksContainer.insertBefore(dragSrcEl, target);
+        }
+      }
+    });
+
+    updateClocks();
+    setInterval(updateClocks, 1000);
+  </script>
+</body>
+</html>
