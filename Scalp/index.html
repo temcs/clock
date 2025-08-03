@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scalping Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+      background-color: #f0f8ff;
+    }
+    h2 {
+      text-align: center;
+      color: #0077b6;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      background-color: #0077b6;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .result {
+      background: #e0f7fa;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Scalping Calculator</h2>
+  <label>Entry Price ($)</label>
+  <input type="number" id="entryPrice" step="0.000001" value="0.196510">
+
+  <label>Leverage (x)</label>
+  <input type="number" id="leverage" value="75">
+
+  <label>Margin ($)</label>
+  <input type="number" id="margin" value="10">
+
+  <label>Target Profit ($)</label>
+  <input type="number" id="profit" value="1">
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    function calculate() {
+      const entry = parseFloat(document.getElementById('entryPrice').value);
+      const leverage = parseFloat(document.getElementById('leverage').value);
+      const margin = parseFloat(document.getElementById('margin').value);
+      const profit = parseFloat(document.getElementById('profit').value);
+
+      const positionSize = margin * leverage;
+      const profitRatio = profit / positionSize;
+
+      const takeProfit = entry * (1 + profitRatio);
+      const stopLoss = entry * (1 - profitRatio);
+
+      const resultBox = document.getElementById('result');
+      resultBox.innerHTML = `
+        <strong>Position Size:</strong> $${positionSize.toFixed(2)}<br>
+        <strong>Required Price Move:</strong> ${(profitRatio * 100).toFixed(4)}%<br>
+        <strong>Take Profit Price:</strong> $${takeProfit.toFixed(6)}<br>
+        <strong>Stop Loss Price:</strong> $${stopLoss.toFixed(6)}
+      `;
+    }
+  </script>
+</body>
+</html>
